@@ -8,21 +8,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2 #Be sure you check-out the repo first. Deta CLI needs access to the files
-      # - uses: BogDAAAMN/deta-deploy-action@v1.0.1
-      #   with:
-      #     deta-access-token: ${{ secrets.DETA_TOKEN }} #Deta access token https://docs.deta.sh/docs/cli/auth
-      #     deta-name: "dabaohero_backend" #Deta Micro name https://docs.deta.sh/docs/cli/commands/#deta-clone
-      #     deta-project: "dabaohero" #Optional: Deta project name https://docs.deta.sh/docs/cli/commands/#deta-clone
-      #     deta-project-dir: "dabaohero_backend" #Optional: directory to be deployed on Deta. Default is the root "."
-      - run: curl -fsSL https://get.deta.dev/cli.sh | sh
-      - run: |
-          export DETA_ACCESS_TOKEN=${{ secrets.DETA_TOKEN }}
-          ls
-          mkdir temp
-          cd temp
-          ~/.deta/bin/deta clone --name dabaohero_backend --project $dabaohero .
-          ls
-      - run: |
-          cd dabaohero_backend
-          ls
-          ~/.deta/bin/deta deploy
+      - uses: BogDAAAMN/deta-deploy-action@v1.0.1
+        with:
+          deta-access-token: ${{ secrets.DETA_TOKEN }} #Deta access token https://docs.deta.sh/docs/cli/auth
+          deta-name: "dabaohero_backend" #Deta Micro name https://docs.deta.sh/docs/cli/commands/#deta-clone
+          deta-project: "dabaohero" #Optional: Deta project name https://docs.deta.sh/docs/cli/commands/#deta-clone
+          deta-project-dir: "dabaohero_backend" #Optional: directory to be deployed on Deta. Default is the root "."
