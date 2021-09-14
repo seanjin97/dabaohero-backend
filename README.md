@@ -8,21 +8,30 @@ Handles core logic of dabaohero app.
 
 ## Run on localhost
 
-### Pre-requisites
+### Step by step
 
-1. Install [poetry](https://python-poetry.org/docs/#installation)
-2. Install dependencies
+1. Install [poetry](https://python-poetry.org/docs/#installation).
+2. Install dependencies.
    > poetry install
-3. Activate virtual env
+3. Activate virtual env.
    > poetry shell
-4. Run on localhost
+4. Run on localhost.
 
    > python3 dabaohero_backend/main.py
+
+### Adding new dependencies
+
+1. Add dependency to the project locally.
+   > poetry add `<dependency name>`
+2. Add name of dependency to [`dabaohero_backend/requirements.txt`](dabaohero_backend/requirements.txt). This file will be read by `deta` on deployment.
 
 ---
 
 ## Deployment
 
-1. Commit and push to Github (only master branch will have CI/CD enabled)
-2. [Visit deployed site](https://dabaohero-backend.deta.dev) @ `dabaohero-backend.deta.dev`
-3. [View available APIs](https://dabaohero-backend.deta.dev/swagger) @ `dabaohero-backend.deta.dev/swagger`
+### Step by step
+
+1. Ensure that all new dependencies installed are added to [`dabaohero_backend/requirements.txt`](dabaohero_backend/requirements.txt).
+2. Commit and push to GitHub (only master branch will have CI/CD enabled).
+3. [Visit deployed site](https://dabaohero-backend.deta.dev) @ `dabaohero-backend.deta.dev`.
+4. [View available APIs](https://dabaohero-backend.deta.dev/swagger) @ `dabaohero-backend.deta.dev/swagger`.
