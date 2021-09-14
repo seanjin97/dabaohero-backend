@@ -25,3 +25,4 @@ Handles core logic of dabaohero app.
 
 1. Commit and push to Github (only master branch will have CI/CD enabled)
 2. [Visit deployed site](dabaohero-backend.deta.dev) @ `dabaohero-backend.deta.dev`
+3. [View available APIs](dabaohero-backend.deta.dev/swagger) @ `dabaohero-backend.deta.dev/swagger`
