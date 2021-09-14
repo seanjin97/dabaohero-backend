@@ -16,9 +16,9 @@ jobs:
       #     deta-project-dir: "dabaohero_backend" #Optional: directory to be deployed on Deta. Default is the root "."
       - run: curl -fsSL https://get.deta.dev/cli.sh | sh
       - run: export DETA_ACCESS_TOKEN=${{ secrets.DETA_TOKEN }}
-      - run: echo $(pwd)
+      - run: ls
       - run: cd dabaohero_backend
-      - run: echo $(pwd)
+      - run: ls
       - run: ~/.deta/bin/deta clone --name dabaohero_backend --project $dabaohero tmp/
       - run: cp -r tmp/.deta .
       - run: ~/.deta/bin/deta deploy
