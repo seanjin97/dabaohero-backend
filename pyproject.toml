@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "dabaohero-backend"
+version = "0.1.0"
+description = ""
+authors = ["Sean Jin <seanjin.lee.2018@sis.smu.edu.sg>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+requests = "^2.26.0"
+fastapi = "^0.68.1"
+uvicorn = "^0.15.0"
+fastapi-cloudauth = "^0.4.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+autopep8 = "^1.5.7"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
