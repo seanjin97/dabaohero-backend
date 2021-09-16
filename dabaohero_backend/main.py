@@ -1,16 +1,15 @@
 
 import os
 import uvicorn
-from pydantic import BaseModel
 from fastapi import FastAPI, Depends, Security
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi_auth0 import Auth0, Auth0User
 from dao import create_user
 import config
-
+from fastapi_cloudauth.auth0 import Auth0, Auth0CurrentUser, Auth0Claims
+from AccessTokenUser import AccessUser
 
 auth = Auth0(domain=config.AUTH0_DOMAIN,
-             api_audience=os.environ["AUTH0_API_AUDIENCE"])
+             customAPI=config.AUTH0_API_AUDIENCE)
 
 app = FastAPI(docs_url="/swagger")
 
@@ -29,11 +28,6 @@ async def root():
     return {"message": "Hello World"}
 
 
-@app.get("/test")
-async def root():
-    return {"message": "test"}
-
-
 @app.post("/user")
 async def createUser(username: str):
     new_user = create_user(username)
@@ -45,9 +39,10 @@ def get_public():
     return {"message": "Anonymous user"}
 
 
-@app.get("/secure", dependencies=[Depends(auth.implicit_scheme)])
-def get_secure(user: Auth0User = Security(auth.get_user)):
-    return {"message": f"{user}"}
+@app.get("/access/")
+def secure_access(current_user: AccessUser = Depends(auth.claim(AccessUser))):
+    # access token is valid and getting user info from access token
+    return f"Hello", {current_user.sub}
 
 
 if __name__ == "__main__":
