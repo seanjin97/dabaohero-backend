@@ -29,8 +29,12 @@ async def root():
 
 
 @app.post("/user")
-async def createUser(username: str):
-    new_user = create_user(username)
+async def createUser(username: str, current_user: AccessUser = Depends(auth.claim(AccessUser))):
+    try:
+        new_user = create_user(username)
+    except:
+        return {"message": "user already exists"}
+
     return new_user
 
 
