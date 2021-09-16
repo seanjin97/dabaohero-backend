@@ -46,8 +46,8 @@ def get_public():
 
 
 @app.get("/secure", dependencies=[Depends(auth.implicit_scheme)])
-def get_secure():
-    return {"message": "this is a private endpoint"}
+def get_secure(user: Auth0User = Security(auth.get_user)):
+    return {"message": f"{user}"}
 
 
 if __name__ == "__main__":
