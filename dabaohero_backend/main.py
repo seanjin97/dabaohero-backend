@@ -29,7 +29,7 @@ async def root():
 
 
 @app.post("/user")
-async def createUser(username: str, current_user: AccessUser = Depends(auth.claim(AccessUser))):
+async def create_user(username: str, current_user: AccessUser = Depends(auth.claim(AccessUser))):
     try:
         new_user = create_user(username)
     except:
