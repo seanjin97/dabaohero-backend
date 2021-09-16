@@ -9,7 +9,9 @@ python = "^3.8"
 requests = "^2.26.0"
 fastapi = "^0.68.1"
 uvicorn = "^0.15.0"
-fastapi-cloudauth = "^0.4.0"
+deta = "^1.0.0"
+fastapi-auth0 = "^0.2.1"
+python-dotenv = "^0.19.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

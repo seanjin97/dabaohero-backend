@@ -4,7 +4,6 @@ charset-normalizer
 click
 colorama
 ecdsa
-fastapi-cloudauth
 fastapi
 h11
 idna
@@ -18,3 +17,5 @@ starlette
 typing-extensions
 urllib3
 uvicorn
+python-dotenv
+fastapi-auth0
