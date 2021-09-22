@@ -11,8 +11,8 @@ Handles core logic of dabaohero app.
 ### Step by step
 
 0. Download the `.env` file from [GDrive](https://drive.google.com/drive/u/0/folders/1mutU9RMSqWVNPfEKg0u4XGSl4zaHT492) and store it in the project root directory.
-1. Install [poetry](https://python-poetry.org/docs/#installation).
-2. Install dependencies.
+1. Install [poetry](https://python-poetry.org/docs/#installation). Only needs to be done once.
+2. Install dependencies. Only needs to be done once and when new dependencies are added.
    > poetry install
 3. Activate virtual env.
    > poetry shell
