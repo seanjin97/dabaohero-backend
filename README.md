@@ -2,7 +2,7 @@
 
 Handles core logic of dabaohero app.
 
-[![Deploy to Deta](https://github.com/WAD2-Group-6/dabaohero-backend/actions/workflows/deta.yml/badge.svg?branch=master)](https://github.com/WAD2-Group-6/dabaohero-backend/actions/workflows/deta.yml)
+[![Deploy to Deta](https://github.com/seanjin97/dabaohero-backend/actions/workflows/deta.yml/badge.svg?branch=master)](https://github.com/seanjin97/dabaohero-backend/actions/workflows/deta.yml)
 
 ---
 
