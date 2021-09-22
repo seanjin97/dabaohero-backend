@@ -3,7 +3,7 @@ import os
 import uvicorn
 from fastapi import FastAPI, Depends, Security
 from fastapi.middleware.cors import CORSMiddleware
-from dao import create_user
+import dao
 import config
 from fastapi_cloudauth.auth0 import Auth0, Auth0CurrentUser, Auth0Claims
 from AccessTokenUser import AccessUser
@@ -28,10 +28,10 @@ async def root():
     return {"message": "Hello World"}
 
 
-@app.post("/user")
-async def create_user(username: str, AccessUser=Depends(auth.claim(AccessUser))):
+@app.post("/user", status_code=201)
+def create_user(username: str, AccessUser=Depends(auth.claim(AccessUser))):
     try:
-        new_user = create_user(username)
+        new_user = dao.create_user(username)
     except:
         return {"message": "user already exists"}
 
