@@ -28,6 +28,11 @@ async def root():
     return {"message": "Hello World"}
 
 
+@app.get("/testing")
+async def test():
+    return {"message": "hello"}
+
+
 @app.post("/user", status_code=201)
 def create_user(username: str, AccessUser=Depends(auth.claim(AccessUser))):
     try:
