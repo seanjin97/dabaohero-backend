@@ -37,7 +37,7 @@ class LoginBody(BaseModel):
 
 
 @app.post("/login")
-def login(login_body: LoginBody):
+def login(login_body: LoginBody,  AccessUser=Depends(auth.claim(AccessUser))):
     # Retrieve email from request body
     email = login_body.email
 
