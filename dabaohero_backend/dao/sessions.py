@@ -1,5 +1,5 @@
 from deta import Deta
-import config
+from dabaohero_backend import config
 
 deta = Deta(config.DETA_BASE_PROJECT_KEY)
 

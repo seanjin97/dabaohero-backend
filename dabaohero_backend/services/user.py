@@ -1,6 +1,6 @@
 import requests
 from urllib.parse import urlencode, quote_plus
-import config
+from dabaohero_backend import config
 from dao import users
 
 
