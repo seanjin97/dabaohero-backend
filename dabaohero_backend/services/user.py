@@ -1,7 +1,7 @@
 import requests
 from urllib.parse import urlencode, quote_plus
 from dabaohero_backend import config
-from dao import users
+from dabaohero_backend.dao import users
 
 
 # Retrieve Auth0 user object
