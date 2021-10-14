@@ -1,5 +1,5 @@
 import requests
-from dabaohero_backend import config
+import config
 import time
 from urllib.parse import urlencode, quote_plus
 

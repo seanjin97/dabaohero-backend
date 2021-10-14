@@ -1,4 +1,4 @@
-from dabaohero_backend.dao import sessions
+from dao import sessions
 import uuid
 
 
