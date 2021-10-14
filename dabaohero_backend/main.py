@@ -1,8 +1,8 @@
 import uvicorn
 from fastapi import FastAPI, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
-from dabaohero_backend.services import user, session, api, postalcodes
-from dabaohero_backend import config
+from services import user, session, api, postalcodes
+import config
 from fastapi_cloudauth.auth0 import Auth0
 from models.user_dtos import LoginBodyDTO, RateUserDTO
 from models.auth_dtos import AccessUser
