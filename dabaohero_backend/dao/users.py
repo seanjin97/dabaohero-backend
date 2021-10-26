@@ -21,3 +21,8 @@ def get_user(key):
 # Update user object with new ouser object
 def update_user(updated_user):
     return userDB.put(updated_user)
+
+
+# Get all users up to 1MB or 1000 record limit
+def get_all_users():
+    return userDB.fetch()

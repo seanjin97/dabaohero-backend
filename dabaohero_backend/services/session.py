@@ -8,12 +8,14 @@ def create_session(session_dto):
     username = session_dto.username
     session_code = str(uuid.uuid4())
 
+    epoch_time = int(session_dto.departure_time.timestamp())
+
     # Create new session
     new_session = {
         "key": session_code,
         "postal_code": session_dto.postal_code,
         "food": session_dto.food,
-        "departure_time": session_dto.departure_time,
+        "departure_time": epoch_time,
         "dabaoer": username,
         "leechers": [],
         "is_active": True
@@ -50,8 +52,10 @@ def get_sessions_by_dabaoer(username):
 
 
 # Get sessions by postal code group
-def get_sessions_by_postal_prefix(prefix):
-    retrieved_sessions = sessions.get_sessions_by_postal_prefix(prefix)
+def get_sessions_by_postal_prefix_and_time(prefix, time):
+    retrieved_sessions = sessions.get_sessions_by_postal_prefix_and_time(
+        prefix, time)
+
     return retrieved_sessions.items
 
 

@@ -32,6 +32,11 @@ POSTALCODES = {
 
 def get_postals_in_group(postal_code):
     first_two = postal_code[:2]
-    postals = [POSTALCODES[district] for district in POSTALCODES.keys(
-    ) if first_two in POSTALCODES[district]][0]
-    return postals
+
+    # Error handling if invalid postal code given
+    postals = [
+        postals for postals in POSTALCODES.values() if first_two in postals]
+    if len(postals) == 0:
+        return []
+
+    return postals[0]

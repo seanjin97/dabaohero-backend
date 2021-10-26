@@ -1,14 +1,15 @@
 import uvicorn
 from fastapi import FastAPI, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
-from services import user, session, api, postalcodes
+from services import user, session, api, postalcodes, leaderboard
 import config
 from fastapi_cloudauth.auth0 import Auth0
 from models.user_dtos import LoginBodyDTO, RateUserDTO
 from models.auth_dtos import AccessUser
 from models.session_dtos import NewSessionDTO, SessionCodeDTO
 from fastapi.responses import JSONResponse
-
+import datetime
+import pytz
 
 auth = Auth0(domain=config.AUTH0_DOMAIN,
              customAPI=config.AUTH0_API_AUDIENCE)
@@ -51,20 +52,37 @@ def login(login_body: LoginBodyDTO,  AccessUser=Depends(auth.claim(AccessUser)))
 # Dabao-er creates new session
 @app.post("/session/create", tags=["session"], description="Create a new session.")
 def create_session(new_session_dto: NewSessionDTO, AccessUser=Depends(auth.claim(AccessUser))):
+
+    # Check if user exists
+    user_object = user.get_user(new_session_dto.username)
+    if not user_object:
+        return JSONResponse(status_code=400, content="Invalid user.")
+
     # Check if postal code is valid
     postal_code = new_session_dto.postal_code
     if len(postal_code) != 6:
-        return JSONResponse(status_code=400, content="Invalid postal code")
+        return JSONResponse(status_code=400, content="Invalid postal code.")
     try:
         float(postal_code)
     except ValueError:
-        return JSONResponse(status_code=400, content="Invalid postal code")
+        return JSONResponse(status_code=400, content="Invalid postal code.")
+
+    # Get postal codes in the same postal sector (https://en.wikipedia.org/wiki/Postal_codes_in_Singapore)
+    postal_group = postalcodes.get_postals_in_group(postal_code)
+
+    # Error handling if invalid postal codes given
+    if len(postal_group) == 0:
+        return []
+
+    # Verify that postal code is legit through API call
+    origin = api.get_lat_long(postal_code)
+
+    # Error handling for invalid postal_code
+    if not origin:
+        return JSONResponse(status_code=400, content="Invalid postal code.")
 
     # Create new session
     new_session = session.create_session(new_session_dto)
-
-    # Add session to user object & update user object
-    user_object = user.get_user(new_session_dto.username)
 
     updated_sessions = user_object["active_sessions"]
     updated_sessions.append(new_session["key"])
@@ -76,8 +94,12 @@ def create_session(new_session_dto: NewSessionDTO, AccessUser=Depends(auth.claim
 # Dabao-er completes a session
 @app.post("/session/complete", tags=["session"], description="Complete a session.")
 def complete_session(session_code_dto: SessionCodeDTO, AccessUser=Depends(auth.claim(AccessUser))):
-    # Remove session from user object
+
+    # Check if user exists
     user_object = user.get_user(session_code_dto.username)
+    if not user_object:
+        return JSONResponse(status_code=400, content="Invalid user.")
+
     current_sessions = user_object["active_sessions"]
     if not session_code_dto.session_code in current_sessions:
         return JSONResponse(status_code=400, content="The session for this session_code is not active for this user.")
@@ -89,6 +111,9 @@ def complete_session(session_code_dto: SessionCodeDTO, AccessUser=Depends(auth.c
 
     # Set session to inactive
     session_object = session.get_session(session_code_dto.session_code)
+    if not session_object:
+        return JSONResponse(status_code=400, content="The session does not exist.")
+
     session_object["is_active"] = False
     session.update_session(session_object)
     return updated_user_object
@@ -108,23 +133,45 @@ def search_for_sessions(postal_code: str = Query(..., min_length=6, max_length=6
     try:
         float(postal_code)
     except ValueError:
-        return JSONResponse(status_code=400, content="Invalid postal code")
+        return JSONResponse(status_code=400, content="Invalid postal code.")
 
     # Get postal codes in the same postal sector (https://en.wikipedia.org/wiki/Postal_codes_in_Singapore)
     postal_group = postalcodes.get_postals_in_group(postal_code)
 
+    # Error handling if invalid postal codes given
+    if len(postal_group) == 0:
+        return []
+
     # Shortlist potential sessions to reduce onemap api calls
     potential_sessions = []
-    for postal in postal_group:
-        potential_sessions += session.get_sessions_by_postal_prefix(postal)
 
-    # TODO filter by timing
+    # Get current time
+    tz = pytz.timezone("Asia/Singapore")
+    current_time = int(datetime.datetime.now(tz).timestamp())
+
+    # Filter by time and postal code prefix
+    for postal in postal_group:
+        potential_sessions += session.get_sessions_by_postal_prefix_and_time(
+            postal, current_time)
+
+    # Error handling if no existing sessions found
+    if len(potential_sessions) == 0:
+        return potential_sessions
 
     # Fine grained filtering to limit walking distance between source and origin to 500m
     origin = api.get_lat_long(postal_code)
+
+    # Error handling for invalid postal_code
+    if not origin:
+        return []
     suitable_sessions = []
     for potential_session in potential_sessions:
         dest = api.get_lat_long(potential_session["postal_code"])
+
+        # Error handling for invalid destination postal_code, skip to the next loop
+        if not dest:
+            continue
+
         distance = api.calculate_distance(origin, dest)
         if distance <= 500:
             suitable_sessions.append(potential_session)
@@ -135,6 +182,13 @@ def search_for_sessions(postal_code: str = Query(..., min_length=6, max_length=6
 # Join session
 @app.post("/session/join", tags=["session"], description="Join session.")
 def join_session(session_code_dto: SessionCodeDTO, AccessUser=Depends(auth.claim(AccessUser))):
+
+    # Check if user exists
+    user_object = user.get_user(session_code_dto.username)
+
+    if not user_object:
+        return JSONResponse(status_code=400, content="Invalid username.")
+
     # Retrieve existing session
     existing_session = session.get_session(session_code_dto.session_code)
 
@@ -142,11 +196,6 @@ def join_session(session_code_dto: SessionCodeDTO, AccessUser=Depends(auth.claim
         return JSONResponse(status_code=400, content="Invalid session code.")
 
     # Add session to user object & update user object
-    user_object = user.get_user(session_code_dto.username)
-
-    if not user_object:
-        return JSONResponse(status_code=400, content="Invalid username.")
-
     updated_sessions = user_object["active_sessions"]
     updated_sessions.append(existing_session["key"])
     user_object["active_sessions"] = updated_sessions
@@ -164,11 +213,21 @@ def join_session(session_code_dto: SessionCodeDTO, AccessUser=Depends(auth.claim
 # Rate session
 @app.post("/user/rate", tags=["user"], description="Rate user")
 def rate_user(rate_user_dto: RateUserDTO, AccessUser=Depends(auth.claim(AccessUser))):
+
+    # Check if user exists
+    user_object = user.get_user(rate_user_dto.username)
+    if not user_object:
+        return JSONResponse(status_code=400, content="Invalid username.")
+
+    # Retrieve user to be rated
+    user_to_rate_object = user.get_user(rate_user_dto.dabaoer)
+
+    if not user_to_rate_object:
+        return JSONResponse(status_code=400, content="Invalid dabaoer username.")
+
     rating = rate_user_dto.rating
     if (rating < 0 or rating > 5):
         return JSONResponse(status_code=400, content="Invalid rating given.")
-    # Retrieve user to be rated
-    user_to_rate_object = user.get_user(rate_user_dto.dabaoer)
 
     # Update number of completed orders
     curr_num_completed_orders = user_to_rate_object["completed_orders"]
@@ -185,7 +244,6 @@ def rate_user(rate_user_dto: RateUserDTO, AccessUser=Depends(auth.claim(AccessUs
     user.update_user(user_to_rate_object)
 
     # Remove session from active session
-    user_object = user.get_user(rate_user_dto.username)
     current_sessions = user_object["active_sessions"]
     if not rate_user_dto.session_code in current_sessions:
         return JSONResponse(status_code=400, content="The session for this session_code is not active for this user.")
@@ -204,14 +262,19 @@ def rate_user(rate_user_dto: RateUserDTO, AccessUser=Depends(auth.claim(AccessUs
 
 
 # Get user profile
-@app.get("/user/account/{username}", tags=["user"], description="Retrieve user profile.")
-def list_user_sessions(username, AccessUser=Depends(auth.claim(AccessUser))):
-    # TODO return Auth0 user details here as well
+@app.get("/user/account/{email}", tags=["user"], description="Retrieve user profile.")
+def get_user_profile(email, AccessUser=Depends(auth.claim(AccessUser))):
+    auth0_user = user.retrieve_auth0_user(email)
+    username = auth0_user["username"]
+
     user_object = user.get_user(username)
-    return user_object
+    merged_user = {**auth0_user, **user_object}
+    return merged_user
 
 
-# TODO leaderboard logic
+@app.get("/leaderboard", tags=["leaderboard"], description="Retrieve leaderboard.")
+def retrieve_leaderboard(AccessUser=Depends(auth.claim(AccessUser))):
+    return leaderboard.leaderboard_top_10()
 
 
 if __name__ == "__main__":

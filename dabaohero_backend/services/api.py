@@ -24,7 +24,10 @@ def get_onemap_token():
 
 def get_lat_long(postal_code):
     res = requests.get(
-        f"{ONEMAP_API_URL}/commonapi/search?searchVal={postal_code}&returnGeom=Y&getAddrDetails=N").json()["results"][0]
+        f"{ONEMAP_API_URL}/commonapi/search?searchVal={postal_code}&returnGeom=Y&getAddrDetails=N").json()["results"]
+    if len(res) == 0:
+        return
+    res = res[0]
     return {"lat": res["LATITUDE"], "long": res["LONGITUDE"]}
 
 

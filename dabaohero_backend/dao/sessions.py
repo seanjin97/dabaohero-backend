@@ -31,7 +31,9 @@ def get_sessions_by_dabaoer(dabaoer):
 
 
 # Retrieve only active sessions with prefixed postal code value
-def get_sessions_by_postal_prefix(prefix):
-    query = {"postal_code?pfx":  prefix, "is_active": True}
+def get_sessions_by_postal_prefix_and_time(prefix, time):
+    query = {"postal_code?pfx":  prefix,
+             "is_active": True, "departure_time?gt": time}
     sessions = sessionDB.fetch(query)
+
     return sessions
