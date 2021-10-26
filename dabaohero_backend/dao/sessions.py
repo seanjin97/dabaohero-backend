@@ -24,16 +24,12 @@ def delete_session(key):
     sessionDB.delete(key)
 
 
-def get_sessions_by_dabaoer(dabaoer):
-    query = {"dabaoer": dabaoer}
-    sessions = sessionDB.fetch(query)
-    return sessions
-
-
 # Retrieve only active sessions with prefixed postal code value
-def get_sessions_by_postal_prefix_and_time(prefix, time):
+def get_sessions_by_postal_prefix_and_time(prefix, time, leecher):
     query = {"postal_code?pfx":  prefix,
-             "is_active": True, "departure_time?gt": time}
+             "is_active": True,
+             "departure_time?gt": time,
+             "leechers?not_contains": leecher}
     sessions = sessionDB.fetch(query)
 
     return sessions

@@ -42,19 +42,13 @@ def get_session(session_code):
         session_object = sessions.get_session(session_code)
         return session_object
     except Exception as e:
-        print("services.session.session_code:", e)
-
-
-# Get sessions by host
-def get_sessions_by_dabaoer(username):
-    retrieved_sessions = sessions.get_sessions_by_dabaoer(username)
-    return retrieved_sessions.items
+        print("services.session.get_session:", e)
 
 
 # Get sessions by postal code group
-def get_sessions_by_postal_prefix_and_time(prefix, time):
+def get_sessions_by_postal_prefix_and_time(prefix, time, username):
     retrieved_sessions = sessions.get_sessions_by_postal_prefix_and_time(
-        prefix, time)
+        prefix, time, username)
 
     return retrieved_sessions.items
 

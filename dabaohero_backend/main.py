@@ -122,13 +122,29 @@ def complete_session(session_code_dto: SessionCodeDTO, AccessUser=Depends(auth.c
 # List sessions by username
 @app.get("/user/sessions/{username}", tags=["user"], description="List a user's sessions.")
 def list_user_sessions(username, AccessUser=Depends(auth.claim(AccessUser))):
-    sessions = session.get_sessions_by_dabaoer(username)
-    return sessions
+    user_object = user.get_user(username)
+    if not user_object:
+        return JSONResponse(status_code=400, content="Invalid user.")
+
+    sessions = user_object["active_sessions"]
+    session_details = []
+    for i in sessions:
+        retrieved_session = session.get_session(i)
+        if retrieved_session and retrieved_session["is_active"]:
+            session_details.append(retrieved_session)
+
+    return session_details
 
 
 # Search for list of valid sessions based one postal code
 @app.get("/session/search", tags=["session"], description="Retrieve available sessions to join based on postal code proximity")
-def search_for_sessions(postal_code: str = Query(..., min_length=6, max_length=6), AccessUser=Depends(auth.claim(AccessUser))):
+def search_for_sessions(username: str = Query(...), postal_code: str = Query(..., min_length=6, max_length=6), AccessUser=Depends(auth.claim(AccessUser))):
+
+    # Check if user exists
+    user_object = user.get_user(username)
+    if not user_object:
+        return JSONResponse(status_code=400, content="Invalid user.")
+
     # Postal code validation
     try:
         float(postal_code)
@@ -152,7 +168,7 @@ def search_for_sessions(postal_code: str = Query(..., min_length=6, max_length=6
     # Filter by time and postal code prefix
     for postal in postal_group:
         potential_sessions += session.get_sessions_by_postal_prefix_and_time(
-            postal, current_time)
+            postal, current_time, username)
 
     # Error handling if no existing sessions found
     if len(potential_sessions) == 0:
@@ -197,6 +213,9 @@ def join_session(session_code_dto: SessionCodeDTO, AccessUser=Depends(auth.claim
 
     # Add session to user object & update user object
     updated_sessions = user_object["active_sessions"]
+    if session_code_dto.session_code in updated_sessions:
+        return JSONResponse(status_code=400, content="User has already joined session.")
+
     updated_sessions.append(existing_session["key"])
     user_object["active_sessions"] = updated_sessions
     updated_user_object = user.update_user(user_object)
