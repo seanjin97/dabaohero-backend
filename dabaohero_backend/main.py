@@ -130,7 +130,7 @@ def list_user_sessions(username, AccessUser=Depends(auth.claim(AccessUser))):
     session_details = []
     for i in sessions:
         retrieved_session = session.get_session(i)
-        if retrieved_session and retrieved_session["is_active"]:
+        if retrieved_session:
             session_details.append(retrieved_session)
 
     return session_details
