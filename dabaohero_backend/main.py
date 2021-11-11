@@ -162,7 +162,7 @@ def search_for_sessions(username: str = Query(...), postal_code: str = Query(...
     potential_sessions = []
 
     # Get current time
-    tz = pytz.timezone("Asia/Singapore")
+    tz = pytz.timezone("UTC")
     current_time = int(datetime.datetime.now(tz).timestamp())
 
     # Filter by time and postal code prefix
