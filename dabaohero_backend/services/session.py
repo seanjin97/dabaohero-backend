@@ -1,15 +1,19 @@
 from dao import sessions
 import uuid
-
+import datetime
+import pytz
 
 # Create a new session and updates user object
+
+
 def create_session(session_dto):
     # Retrieve request body
     username = session_dto.username
     session_code = str(uuid.uuid4())
 
-    epoch_time = int(session_dto.departure_time.timestamp())
-
+    epoch_time_naive = int(session_dto.departure_time.timestamp())
+    epoch_time = datetime.datetime.fromtimestamp(
+        epoch_time_naive, tz=pytz.timezone("Asia/Singapore"))
     # Create new session
     new_session = {
         "key": session_code,
