@@ -181,6 +181,8 @@ def search_for_sessions(username: str = Query(...), postal_code: str = Query(...
     if not origin:
         return []
     suitable_sessions = []
+
+    print(potential_sessions)
     for potential_session in potential_sessions:
         dest = api.get_lat_long(potential_session["postal_code"])
 
